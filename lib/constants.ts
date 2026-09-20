@@ -103,7 +103,7 @@ export const HEATMAP_WIDGET_CONFIG = {
     grouping: 'sector',
     isTransparent: true,
     locale: 'en',
-    symbolUrl: '',
+    symbolUrl: 'https://open-stock-rouge.vercel.app/stocks/{tvsymbol}',
     colorTheme: 'dark',
     exchanges: [],
     hasTopBar: false,
