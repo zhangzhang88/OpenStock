@@ -20,6 +20,7 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
     const { symbol } = await params;
     const tvSymbol = formatSymbolForTradingView(symbol);
     const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
+    const tradingViewUrl = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSymbol)}`;
 
     const session = await auth.api.getSession({
         headers: await headers()
@@ -60,13 +61,21 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
 
                 {/* Right column */}
                 <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <WatchlistButton
                             symbol={symbol.toUpperCase()}
                             company={symbol.toUpperCase()}
                             isInWatchlist={isInWatchlist}
                             userId={userId}
                         />
+                        <a
+                            href={tradingViewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center rounded-md border border-[#2962FF] px-4 py-2 text-sm font-medium text-[#9DB2FF] transition-colors hover:bg-[#2962FF] hover:text-white"
+                        >
+                            View on TradingView ↗
+                        </a>
                     </div>
 
                     <StockSentimentCard insight={sentimentInsights} />
