@@ -1,36 +1,52 @@
 'use client';
 import { useEffect, useRef } from "react";
 
-const useTradingViewWidget = (scriptUrl: string, config: Record<string, unknown>, height: number | string = 600) => {
+const useTradingViewWidget = (
+    scriptUrl: string,
+    config: Record<string, unknown>,
+    height: number | string = 600
+) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        const container = containerRef.current;
+        if (!container) return;
 
-        // Clean up previous instance
-        containerRef.current.innerHTML = '';
+        const widgetContainer = container.querySelector<HTMLElement>(
+            '.tradingview-widget-container__widget'
+        );
 
-        // Create wrapper with dynamic height support
-        // If autosize is true in config, we want 100% height/width
-        const isAutosize = config.autosize === true;
-        const styleHeight = isAutosize ? '100%' : `${height}px`;
+        if (!widgetContainer) return;
 
-        containerRef.current.innerHTML = `<div class="tradingview-widget-container__widget" style="width: 100%; height: ${styleHeight};"></div>`;
+        // Keep the React-rendered widget container intact. TradingView expects its
+        // loader script to be appended next to that container and will populate it.
+        while (widgetContainer.firstChild) {
+            widgetContainer.removeChild(widgetContainer.firstChild);
+        }
 
-        const script = document.createElement("script");
+        container
+            .querySelectorAll('script[data-tradingview-widget-script="true"]')
+            .forEach((existingScript) => existingScript.remove());
+
+        const script = document.createElement('script');
         script.src = scriptUrl;
+        script.type = 'text/javascript';
         script.async = true;
-        script.innerHTML = JSON.stringify(config);
+        script.dataset.tradingviewWidgetScript = 'true';
+        script.textContent = JSON.stringify(config);
 
-        containerRef.current.appendChild(script);
+        container.appendChild(script);
 
         return () => {
-            if (containerRef.current) {
-                containerRef.current.innerHTML = '';
+            script.remove();
+
+            while (widgetContainer.firstChild) {
+                widgetContainer.removeChild(widgetContainer.firstChild);
             }
-        }
-    }, [scriptUrl, JSON.stringify(config), height]) // Use stringified config to avoid ref issues
+        };
+    }, [scriptUrl, JSON.stringify(config), height]);
 
     return containerRef;
-}
-export default useTradingViewWidget
+};
+
+export default useTradingViewWidget;
